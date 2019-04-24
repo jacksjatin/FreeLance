@@ -1,0 +1,29 @@
+﻿@{
+    ViewBag.Title = "About";
+}
+<h2>@ViewBag.Title.</h2>
+<h3>@ViewBag.Message</h3>
+
+<p>Use this area to provide additional information.</p>
+
+<button class="btn btn-primary" id="btnBack" onclick="CancelMessage(false)">Back</button>
+
+<script>
+    function CancelMessage(Iscancel) {
+        var a = "@ViewBag.TempMsg";
+        if (Iscancel) {
+            var result = confirm("All changes will be lost.  Do you wish to continue?");
+            if (result) {
+                window.location.href = AppConfig.AppRootUrl + "/DailySummary/Index";
+            }
+        }
+        else {
+
+
+            //window.location.href = AppConfig.AppRootUrl + "/DailySummary/Index";
+            window.location.href = AppConfig.AppRootUrl + "/Contact";
+        }
+    }
+
+</script>
+

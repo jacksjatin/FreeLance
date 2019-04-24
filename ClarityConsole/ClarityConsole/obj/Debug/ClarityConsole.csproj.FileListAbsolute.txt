@@ -1,0 +1,10 @@
+C:\github\ClarityConsole\ClarityConsole\bin\Debug\ClarityConsole.exe.config
+C:\github\ClarityConsole\ClarityConsole\bin\Debug\ClarityConsole.exe
+C:\github\ClarityConsole\ClarityConsole\bin\Debug\ClarityConsole.pdb
+C:\github\ClarityConsole\ClarityConsole\bin\Debug\Newtonsoft.Json.dll
+C:\github\ClarityConsole\ClarityConsole\bin\Debug\Newtonsoft.Json.xml
+C:\github\ClarityConsole\ClarityConsole\obj\Debug\ClarityConsole.csprojAssemblyReference.cache
+C:\github\ClarityConsole\ClarityConsole\obj\Debug\ClarityConsole.csproj.CoreCompileInputs.cache
+C:\github\ClarityConsole\ClarityConsole\obj\Debug\ClarityConsole.csproj.CopyComplete
+C:\github\ClarityConsole\ClarityConsole\obj\Debug\ClarityConsole.exe
+C:\github\ClarityConsole\ClarityConsole\obj\Debug\ClarityConsole.pdb

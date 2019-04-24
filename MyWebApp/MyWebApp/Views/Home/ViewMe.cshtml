@@ -1,0 +1,975 @@
+﻿@using System.Globalization;
+@{
+    ViewBag.Title = "GenerateReport";
+}
+<div class="page-title" style="margin-top:20px;">Daily Summary Report</div>
+<div style="background-color:lightgray;height: 30px;margin-bottom: 5px;vertical-align:middle;">
+    @*background-color:gainsboro*@
+    <ul class="header-inner" style="padding-top:5px;">
+        <li class="pull-left">
+            <label>Store: @ViewBag.Store</label>
+        </li>
+        <li class="pull-right">
+            <label>Date: @ViewBag.Date</label>
+        </li>
+    </ul>
+</div>
+<div class="table-responsive" id="generatedailysummaryreport">
+    <table class="table table-hover" id="tblReport">
+        <thead>
+            <tr style="height:70px;">
+                @*<th style="text-align:left;">Description</th>
+                    <th style="text-align:right">Per Cash Report</th>
+                    <th style="text-align:right;">Corrected</th>
+                    <th style="text-align:right;">Adjustment</th>
+                    <th style="text-align:left;">Notes</th>*@
+                <th>Description</th>
+                <th style="text-align:right">Per Cash Report</th>
+                <th></th>
+                <th style="text-align:center;">Corrected</th>
+                <th></th>
+                <th style="text-align:right">Adjustment</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model != null)
+                {
+                    if (Model.Headers.Count > 0)
+                    {
+                        foreach (var item in Model.Headers)
+                        {
+                            <tr>
+                                <td style="text-align:left;padding-left:10px;" class="subHeaderValue">
+                                    @item.DSRTD_Lable
+                                </td>
+                                <td></td>@*per cash report*@
+                                <td style="text-align:left;padding-left:10px;" class="subHeaderValue">
+                                    @item.DSRTD_Lable2
+                                </td>
+                                <td></td>@*corrected value*@
+                                <td style="text-align:left;padding-left:10px;" class="subHeaderValue">
+                                    @item.DSRTD_Lable2
+                                </td>
+                                <td></td>@*adjustment value*@
+                                <td></td>@*comment*@
+                            </tr>
+                            foreach (var field in Model.Fields)
+                            {
+                                if (@item.DSRPT_SectionID == field.DSRPT_SectionID)
+                                {
+                                    if (field.DSRPTF_FieldStyle.ToString() == "td-line")
+                                    {
+                                        <tr>
+                                            <td colspan="7">
+                                                <hr class="dash" />
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            @{
+                                                var className = "";
+                                                bool isContain(int fieldId)
+                                                {
+                                                    int[] Array = { 37, 38, 41, 62, 65, 67, 55, 111 };
+                                                    for (int i = 0; i < Array.Length; i++)
+                                                    {
+                                                        if (Array[i] == fieldId)
+                                                        {
+                                                            return true;
+                                                        }
+                                                    }
+                                                    return false;
+                                                }
+                                                if (field.DSRPTF_FieldStyle == "td-center" && !isContain(field.DSRPTD_FieldID))
+                                                {
+                                                    className = "RightIndent";
+                                                }
+                                                else
+                                                {
+                                                    className = "LeftAlign";
+                                                }
+                                            }
+                                            <td class="@className">
+                                                @*DSRPTD_ReportFieldID*@
+                                                <input type="hidden" value="@field.DSRPTD_ReportFieldID" class="form-control ReportFieldId" />
+                                                @*DSRPTF_TotalFieldID*@
+                                                <input type="hidden" value="@field.DSRPTF_TotalFieldID" class="form-control TotalFieldId" />
+                                                @*DSRPTF_Operation*@
+                                                <input type="hidden" value="@field.DSRPTF_Operation" class="form-control Operation" />
+                                                @*DSRPTD_FieldID*@
+                                                <input type="hidden" value="@field.DSRPTD_FieldID" class="form-control FieldID" />
+                                                @*DSRPTF_FieldStyle*@
+                                                <input type="hidden" value="@field.DSRPTF_FieldStyle" class="form-control FieldStyle" />
+                                                @*DSRPTF_FieldType*@
+                                                <input type="hidden" value="@field.DSRPTF_FieldType" class="form-control FieldType" />
+                                                @*DSRPTF_Formula*@
+                                                <input type="hidden" value="@field.DSRPTF_Formula" class="form-control Formula" />
+                                                @field.DSRTD_FieldName
+                                            </td>
+                                            @*DSRPTD_CalculatedValue Section*@
+                                            <td class="@field.DSRPTF_FieldStyle" style="text-align:right !important;">
+                                                @if (field.DSRPTD_CalculatedValue.HasValue)
+                                                {
+                                                    if (!field.DSRPTF_FieldType.IsEmpty())
+                                                    {
+                                                        if (field.DSRPTD_CalculatedValue == null)
+                                                        {
+                                                            @String.Format("{0:n0}", String.Empty);
+                                                        }
+                                                        else
+                                                        {
+                                                            if (field.DSRPTF_FieldType.ToString().ToLower() == "currency")
+                                                            {
+                                                                @field.DSRPTD_CalculatedValue.Value.ToString("C", CultureInfo.CurrentCulture)
+                                                            }
+                                                            else if (field.DSRPTF_FieldType.ToString().ToLower() == "number")
+                                                            {
+                                                                @String.Format("{0:n0}", field.DSRPTD_CalculatedValue)
+                                                            }
+                                                            else
+                                                            {
+                                                                @String.Format("{0:.##}", field.DSRPTD_CalculatedValue)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            </td>
+                                            @*DSRPTD_CalculatedValue2 Section*@
+                                            <td class="@field.DSRPTF_FieldStyle" style="text-align:right !important;">
+                                                @{
+                                                    var displayCalculate = "";
+                                                    if (Double.TryParse(field.DSRPTD_CalculatedValue2, out double num) == true)
+                                                    {
+                                                        if (field.DSRPTF_FieldType.ToString().ToLower() == "currency" && field.DSRPTD_FieldID == 29)
+                                                        {
+                                                            displayCalculate = field.DSRPTD_CalculatedValue2 + "%";
+                                                        }
+                                                        else if (field.DSRPTF_FieldType.ToString().ToLower() == "currency")
+                                                        {
+                                                            displayCalculate = Convert.ToDouble(field.DSRPTD_CalculatedValue2).ToString("C", CultureInfo.CurrentCulture);
+                                                        }
+                                                        else if (field.DSRPTF_FieldType.ToString().ToLower() == "number")
+                                                        {
+                                                            displayCalculate = String.Format("{0:n0}", field.DSRPTD_CalculatedValue2);
+                                                        }
+                                                        else
+                                                        {
+                                                            displayCalculate = String.Format("{0:.##}", field.DSRPTD_CalculatedValue2);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        displayCalculate = field.DSRPTD_CalculatedValue2;
+                                                    }
+                                                }
+                                                <input type="hidden" value="@displayCalculate" />
+                                                <span>@displayCalculate</span>
+                                            </td>
+                                            @*DSRPTD_CorrectedValue Section*@
+                                            <td class="@field.DSRPTF_FieldStyle" style="text-align:right !important;">
+                                                @{
+                                                    var CalculatedIsnull = field.DSRPTD_CalculatedValue == default(double?);
+                                                    var CorrectedIsnull = field.DSRPTD_CorrectedValue == default(double?);
+                                                    var CorrectedValue = CorrectedIsnull == false ? field.DSRPTD_CorrectedValue.Value.ToString("C", CultureInfo.CurrentCulture) : @String.Empty;
+                                                    var CorrectedValueNumeric = CorrectedIsnull == false ? @String.Format("{0:n}", field.DSRPTD_CorrectedValue.Value) : @String.Empty;
+                                                    var CorrectedValueNumber = CorrectedIsnull == false ? @String.Format("{0:n0}", field.DSRPTD_CorrectedValue.Value) : @String.Empty;
+                                                    var CorrectedValueOther = CorrectedIsnull == false ? @String.Format("{0:.##}", field.DSRPTD_CorrectedValue.Value) : @String.Empty;
+                                                    var CalculatedValue = CalculatedIsnull == false ? field.DSRPTD_CalculatedValue.Value.ToString("C", CultureInfo.CurrentCulture) : "0";
+                                                    var CalculatedValueNumber = CalculatedIsnull == false ? @String.Format("{0:n0}", field.DSRPTD_CalculatedValue.Value) : "0";
+                                                    var CalculatedValueOther = CalculatedIsnull == false ? @String.Format("{0:.##}", field.DSRPTD_CalculatedValue.Value) : "0";
+                                                }
+                                                @if (field.DSRPTF_FieldType.ToString().ToLower() == "currency")
+                                                {
+                                                    var hiddenId = field.DSRPTD_ReportFieldID + "_" + field.DSRPTD_FieldID;
+                                                    if (field.DSRPTF_FieldStyle.ToString().ToLower() == "td-total")
+                                                    {
+                                                        <input name="hiddentotal" type="hidden" id="@hiddenId" data-id="@field.DSRPTD_FieldID" data-org="@CalculatedValue" class="@item.DSRTD_Lable" value="@CorrectedValueNumeric" />
+                                                        if (field.DSRPTD_Adjustment.HasValue && (field.DSRPTD_Adjustment > 0 || field.DSRPTD_Adjustment < 0))
+                                                        {
+                                                            <span class="@field.DSRPTD_FieldID" style="background-color:#fbfb93;">@CorrectedValue</span>
+                                                        }
+                                                        else
+                                                        { <span class="@field.DSRPTD_FieldID">@CorrectedValue</span>}
+                                                }
+                                                else
+                                                {
+                                                    <span style="padding-right:2px;">$</span>
+                                                    if (field.DSRPTD_Adjustment.HasValue && (field.DSRPTD_Adjustment > 0 || field.DSRPTD_Adjustment < 0))
+                                                    {
+                                                        <input type="text" id="@hiddenId" value="@CorrectedValueNumeric" data-id="@field.DSRPTD_FieldID" data-org="@CalculatedValueNumber" class="correct form-control @item.DSRTD_Lable currency-only" style="text-align: right;background-color:#fbfb93;" @ViewBag.Disable />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" id="@hiddenId" value="@CorrectedValueNumeric" data-id="@field.DSRPTD_FieldID" data-org="@CalculatedValueNumber" class="correct form-control @item.DSRTD_Lable currency-only" style="text-align: right;" @ViewBag.Disable />
+                                                    }
+                                                }
+                                            }
+                                            else if (field.DSRPTF_FieldType.ToString().ToLower() == "number")
+                                            {
+                                                var hiddenId = field.DSRPTD_ReportFieldID + "_" + field.DSRPTD_FieldID;
+                                                @*<span style="float:right; padding-left:10px;">*@
+                                                if (field.DSRPTF_FieldStyle.ToString().ToLower() == "td-total")
+                                                {
+                                                    <input type="hidden" id="@hiddenId" data-org="@CalculatedValueNumber" class="@item.DSRTD_Lable" value="@CorrectedValueNumber" />
+                                                    if (field.DSRPTD_Adjustment.HasValue && (field.DSRPTD_Adjustment > 0 || field.DSRPTD_Adjustment < 0))
+                                                    {
+                                                        <span class="@field.DSRPTD_FieldID number_format" style="background-color:#fbfb93;"> @CorrectedValueNumber</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="@field.DSRPTD_FieldID number_format"> @CorrectedValueNumber</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (field.DSRPTD_Adjustment.HasValue && (field.DSRPTD_Adjustment > 0 || field.DSRPTD_Adjustment < 0))
+                                                    {
+                                                        <input type="text" id="@hiddenId" value="@CorrectedValueNumber" data-id="@field.DSRPTD_FieldID" data-org="@CalculatedValueNumber" class="correct form-control @item.DSRTD_Lable numeric-only" style="text-align: right;background-color:#fbfb93;" @ViewBag.Disable />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" id="@hiddenId" value="@CorrectedValueNumber" data-id="@field.DSRPTD_FieldID" data-org="@CalculatedValueNumber" class="correct form-control @item.DSRTD_Lable numeric-only" style="text-align: right;" @ViewBag.Disable />
+                                                    }
+                                                }
+                                                @*</span>*@
+                                            }
+                                            else
+                                            {
+                                                var hiddenId = field.DSRPTD_ReportFieldID + "_" + field.DSRPTD_FieldID;
+                                                if (field.DSRPTF_FieldStyle.ToString().ToLower() == "td-total")
+                                                {
+                                                    <input type="hidden" id="@hiddenId" data-org="@CalculatedValueOther" class="@item.DSRTD_Lable" value="@CorrectedValueOther" />
+                                                    if (field.DSRPTD_Adjustment.HasValue && (field.DSRPTD_Adjustment > 0 || field.DSRPTD_Adjustment < 0))
+                                                    {
+                                                        <span class="@field.DSRPTD_FieldID" style="background-color:#fbfb93;">
+                                                            @CorrectedValueOther
+                                                        </span>
+                                                    }
+                                                    else
+                                                    { <span class="@field.DSRPTD_FieldID">
+                                                            @CorrectedValueOther
+                                                        </span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <input type="text" id="@hiddenId" value="@String.Format("{0:f2}", CorrectedValue)" data-org="@String.Format("{0:f2}", CalculatedValue)" class="correct form-control @item.DSRTD_Lable" style="display:inline;" @ViewBag.Disable />
+                                                }
+                                            }
+                                            </td>
+                                            @*DSRPTD_CorrectedValue2 Section*@
+                                            <td class="@field.DSRPTF_FieldStyle" style="text-align:right !important;">
+                                                @{
+                                                    var displayCorrected = "";
+                                                    if (Double.TryParse(field.DSRPTD_CorrectedValue2, out double num1) == true)
+                                                    {
+                                                        if (field.DSRPTF_FieldType.ToString().ToLower() == "currency")
+                                                        {
+                                                            displayCorrected = Convert.ToDouble(field.DSRPTD_CorrectedValue2).ToString("C", CultureInfo.CurrentCulture);
+                                                        }
+                                                        else if (field.DSRPTF_FieldType.ToString().ToLower() == "number")
+                                                        {
+                                                            displayCorrected = String.Format("{0:n0}", field.DSRPTD_CorrectedValue2);
+                                                        }
+                                                        else
+                                                        {
+                                                            displayCorrected = String.Format("{0:.##}", field.DSRPTD_CorrectedValue2);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        displayCorrected = field.DSRPTD_CorrectedValue2;
+                                                    }
+                                                }
+                                                <input type="hidden" value="@displayCorrected" />
+                                                <span>@displayCorrected</span>
+                                            </td>
+                                            @*DSRPTD_Adjustment Section*@
+                                            <td class="@field.DSRPTF_FieldStyle" style="text-align:right !important;">
+                                                @if (field.DSRPTD_Adjustment.HasValue)
+                                                {
+                                                    if (field.DSRPTF_FieldStyle.ToString().ToLower() == "td-total")
+                                                    {
+                                                        <input type="hidden" class="@field.DSRPTF_TotalFieldID TotalAdjustment" value="@field.DSRPTD_Adjustment" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="hidden" class="@field.DSRPTF_TotalFieldID Adjustment" value="@field.DSRPTD_Adjustment" />
+                                                    }
+                                                    if (field.DSRPTF_FieldType.ToString().ToLower() == "currency")
+                                                    {
+                                                        <span>@field.DSRPTD_Adjustment.Value.ToString("C", CultureInfo.CurrentCulture)</span>
+                                                    }
+                                                    else if (field.DSRPTF_FieldType.ToString().ToLower() == "number")
+                                                    {
+                                                        <span>@(String.Format("{0}", String.Format("{0:n0}", field.DSRPTD_Adjustment)))</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>@(String.Format("{0}", String.Format("{0:f2}", field.DSRPTD_Adjustment)))</span>
+                                                    }
+                                                }
+                                            </td>
+                                            @*DSRPTF_Comment Section*@
+                                            <td>
+                                                @if (field.DSRPTF_FieldStyle.ToString().ToLower() != "td-total")
+                                                {
+                                                    <input type="text" value="@field.DSRPTF_Comment" maxlength="500" class="form-control form-note" @ViewBag.Disable />
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        </tbody>
+    </table>
+    <div></div>
+    <div class="btn-demo m-b-20 text-center">
+        <br />
+        @if (ViewBag.Status == "view")
+        {
+            <button class="btn btn-primary" id="btnBack" onclick="CancelMessage(false)">Back</button>
+        }
+        else
+        {
+            <button class="btn btn-success" id="btnSave">Save</button>
+            <button class="btn btn-success" id="btnSubmit">Submit</button>
+            <button class="btn btn-primary" id="btnCancel" onclick="CancelMessage(true)">Cancel</button>
+        }
+    </div>
+    @* } *@
+</div>
+@section adminscripts
+{
+    <script>
+        function ValidateCurrency(obj) {
+            var regex = /^-?[0-9]*(?:\.\d{1,2})?$/;    //ALLOW NUMBERS WITH DECIMAL POINTS
+            if (!regex.test($(obj).val())) {
+                alert('Invalid corrected value');
+                $(obj).val('');
+                $(obj).focus();
+                return false;
+            }
+        }
+        function isContain(fieldId) {
+            var arrayID = [37, 38, 41, 62, 65, 67];
+            return arrayID.includes(fieldId);
+        }
+        function ValidateNumber(obj) {
+            var regex = /^-?[0-9]$/;///^-?[0-9\b]+$/;    //ALLOW ONLY NUMBERS [0-9]
+            if (!regex.test($(obj).val())) {
+                alert('Invalid corrected value');
+                $(obj).val('');
+                $(obj).focus();
+                return false;
+            }
+        }
+        $(function () {
+            $('.currency-only').on('input', function () {
+                this.value = this.value
+                    //.replace(/^-?\d{2}(\.\d+)?$/g,'')
+                    .replace(/[^-?\d.]/g, '')             // numbers and decimals only
+                    //.replace(/(^[\d]{2})[\d]/g, '$1')   // not more than 2 digits at the beginning
+                    .replace(/(\..*)\./g, '$1')         // decimal can't exist more than once
+                    .replace(/(\.[\d]{2})./g, '$1');    // not more than 4 digits after decimal
+            });
+            $('.numeric-only').on('input', function () {
+                this.value = this.value
+                    .replace(/[^-?\d]/g, '');             // numbers and decimals only
+            });
+        });
+        $('#tblReport > tbody > tr:nth-child(16) > td:nth-child(4) > span').on('DOMSubtreeModified', function () {
+            if ($('#tblReport > tbody > tr:nth-child(52) > td:nth-child(4) > span').html().replace("$", "") == $('#tblReport > tbody > tr:nth-child(16) > td:nth-child(4) > span').html().replace("$", "")) {
+                $('#tblReport > tbody > tr:nth-child(52) > td:nth-child(5) > span').html("Y");
+            }
+            else {
+                $('#tblReport > tbody > tr:nth-child(52) > td:nth-child(5) > span').html("N");
+            }
+        });
+        $('#tblReport > tbody > tr:nth-child(52) > td:nth-child(4) > span').on('DOMSubtreeModified', function () {
+            if ($('#tblReport > tbody > tr:nth-child(52) > td:nth-child(4) > span').html().replace("$", "") == $('#tblReport > tbody > tr:nth-child(16) > td:nth-child(4) > span').html().replace("$", "")) {
+                $('#tblReport > tbody > tr:nth-child(52) > td:nth-child(5) > span').html("Y");
+            }
+            else {
+                $('#tblReport > tbody > tr:nth-child(52) > td:nth-child(5) > span').html("N");
+            }
+        });
+        $('#tblReport > tbody > tr:nth-child(28) > td:nth-child(4) > span').on('DOMSubtreeModified', function () {
+            var salesRUL = returnNumericVal($('#tblReport > tbody > tr:nth-child(29) > td:nth-child(4) > input').val());
+            var salesPUL = returnNumericVal($('#tblReport > tbody > tr:nth-child(30) > td:nth-child(4) > input').val());
+            var salesMUL = returnNumericVal($('#tblReport > tbody > tr:nth-child(31) > td:nth-child(4) > input').val());
+            var gallonsRUL = returnNumericVal($('#tblReport > tbody > tr:nth-child(24) > td:nth-child(4) > input').val());
+            var gallonsPUL = returnNumericVal($('#tblReport > tbody > tr:nth-child(25) > td:nth-child(4) > input').val());
+            var gallonsMUL = returnNumericVal($('#tblReport > tbody > tr:nth-child(26) > td:nth-child(4) > input').val());
+            var resRUL = 0;
+            var resPUL = 0;
+            var resMUL = 0;
+            if (salesRUL != "0.00" || gallonsRUL != "0") {
+                resRUL = salesRUL / gallonsRUL == Infinity ? 0 : salesRUL / gallonsRUL;
+            }
+            if (salesPUL != "0.00" || gallonsRUL != "0") {
+                resPUL = salesPUL / gallonsPUL == Infinity ? 0 : salesPUL / gallonsPUL;
+            }
+            if (salesMUL != "0.00" || gallonsMUL != "0") {
+                resMUL = salesMUL / gallonsMUL == Infinity ? 0 : salesMUL / gallonsMUL;
+            }
+            $('#tblReport > tbody > tr:nth-child(29) > td:nth-child(5) > span').html("$" + resRUL.toFixed(2));
+            $('#tblReport > tbody > tr:nth-child(30) > td:nth-child(5) > span').html("$" + resPUL.toFixed(2));
+            $('#tblReport > tbody > tr:nth-child(31) > td:nth-child(5) > span').html("$" + resMUL.toFixed(2));
+        })
+
+        $("#btnSave").on('click', function () {
+            GetTableData('SAVE');
+        });
+        $("#btnSubmit").on('click', function () {
+            var result = confirm("You will not be able to update this report once it is submitted.  Do you wish to continue?");
+            if (result) {
+                GetTableData('SUBMIT');
+            }
+        });
+        function CancelMessage(Iscancel) {
+            if (Iscancel) {
+                var result = confirm("All changes will be lost.  Do you wish to continue?");
+                if (result) {
+                    window.location.href = AppConfig.AppRootUrl + "/DailySummary/Index";
+                }
+            }
+            else {
+
+                //window.location.href = AppConfig.AppRootUrl + "/DailySummary/Index";
+                window.location.href = AppConfig.AppRootUrl + "/IntacctUpload/Index";
+            }
+        }
+
+        @*function btnBackclick() {
+            var navigation = @ViewBag.summaryReport;
+            if (navigation == 'summaryReport') {
+                window.location.href = AppConfig.AppRootUrl + "/DailySummary/Index";
+            }
+            else
+                window.location.href = AppConfig.AppRootUrl + "/IntacctUpload/Index";
+        }*@
+        @*function btnBackclick() {
+            var navigation = '@ViewBag.summaryReport';
+            if (navigation = 'summaryReport') {
+                window.location.href = AppConfig.AppRootUrl + "/IntacctUpload/Index";
+            }
+            else
+                window.location.href = AppConfig.AppRootUrl + "/DailySummary/Index";
+
+
+        }*@
+        @*function btnBackclick() {
+            var navigation = '@ViewBag.summaryReport';
+            if (navigation = 'summaryReport') {
+                window.location.href = AppConfig.AppRootUrl + "/IntacctUpload/Index";
+            }
+            else
+                window.location.href = AppConfig.AppRootUrl + "/DailySummary/Index";
+        }*@
+        @*function btnBackclick() {
+            var navsumamry = '@ViewBag.summaryReport';
+            var navintacct = '@ViewBag.intacctUpload';
+            if (navsumamry = 'summaryReport') {
+                location.href = '@Url.Action("Index", "DailySummary")';
+            }
+            else if (navintacct = 'intacctUpload'){
+                location.href = '@Url.Action("Index", "IntacctUpload")';
+                }
+            }*@
+        function GetTableData(event) {
+            var DailySummaryReportDetail = [];
+            $("#tblReport tbody tr").next().each(function () {
+                var currentRow = $(this);
+                //var dataField = currentRow.find("td:eq(0)").html().trim();
+                var DSRPTD_ReportFieldID = currentRow.find("td:eq(0)").find('input').val();
+                var DSRPTD_CalculatedValue = currentRow.find("td:eq(1)").text().replace("$", "").replace(/,/g, '').replace("%", "");
+                var DSRPTD_CalculatedValue2 = currentRow.find("td:eq(2)").text().replace("$", "").replace(/,/g, '').replace("%", "");
+                var DSRPTD_CorrectedValue = currentRow.find("td:eq(3)").find('input').val();
+                var DSRPTD_CorrectedValue2 = currentRow.find("td:eq(4)").find('input').val();
+                //var DSRPTD_Adjustment = currentRow.find("td:eq(5)").text().replace("$", "").replace(/,/g, '').replace("%", "");
+                var DSRPTD_Adjustment = currentRow.find("td:eq(5)").find('input').val();
+                var DSRPTF_Comment = "";
+                var DSRPTF_CommentObj = currentRow.find("td:eq(6)").find('input');
+                if (DSRPTF_CommentObj != null && currentRow.find("td:eq(6)").find('input').val() != undefined) {
+                    DSRPTF_Comment = currentRow.find("td:eq(6)").find('input').val();
+                } else {
+                    DSRPTF_Comment = "";
+                }
+                if (DSRPTD_CalculatedValue != '') {
+                    var obj = {};
+                    obj.DSRPTD_ReportFieldID = DSRPTD_ReportFieldID;
+                    obj.DSRPTD_CalculatedValue = returnNumericVal(DSRPTD_CalculatedValue);
+                    if (!isNaN(DSRPTD_CorrectedValue.replace(/,/g, ''))) {
+                        obj.DSRPTD_CorrectedValue = returnNumericVal(DSRPTD_CorrectedValue);
+                    }
+                    else {
+                        obj.DSRPTD_CorrectedValue = parseFloat(0.00);
+                    }
+                    obj.DSRPTD_Adjustment = returnNumericVal(DSRPTD_Adjustment);
+                    obj.DSRPTF_Comment = DSRPTF_Comment;
+                    obj.DSRPTD_CalculatedValue2 = DSRPTD_CalculatedValue2 != "" ? DSRPTD_CalculatedValue2.trim().replace("$", "") : "";
+                    obj.DSRPTD_CorrectedValue2 = DSRPTD_CorrectedValue2 != "" ? DSRPTD_CorrectedValue2.trim().replace("$", "") : "";
+                    DailySummaryReportDetail.push(obj);
+                }
+            });
+            console.log(DailySummaryReportDetail);
+            var AddAnChecklistByJsonURL = AppConfig.AppRootUrl + '/DailySummary/SaveCorrection';
+            if (event == "SUBMIT") {
+                AddAnChecklistByJsonURL = AppConfig.AppRootUrl + '/DailySummary/SubmitCorrection';
+            }
+            $.ajax({
+                cache: false,
+                contentType: "application/json; charset=utf-8",
+                type: "POST",
+                url: AddAnChecklistByJsonURL,
+                data: JSON.stringify(DailySummaryReportDetail),
+                success: function (Data) {
+                    window.location.href = AppConfig.AppRootUrl + "/DailySummary/Index";
+                }
+            });
+        }
+        function addCommas(nStr) {
+            nStr += '';
+            x = nStr.split('.');
+            x1 = x[0];
+            x2 = x.length > 1 ? '.' + x[1] : '';
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+                x1 = x1.replace(rgx, '$1' + ',' + '$2');
+            }
+            return '$' + x1 + x2;
+        }
+        function addCommasWithoutCurrency(nStr) {
+            nStr += '';
+            x = nStr;
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x)) {
+                x = x.replace(rgx, '$1' + ',' + '$2');
+            }
+            return x;
+        }
+        function returnNumericVal(val) {
+            var returnval = 0;
+            if (val.indexOf("(") != -1) {
+                returnval = parseFloat(val.replace("$", "").replace("%", "").replace(/,/g, '').replace("(", "").replace(")", "")) * (-1);
+            }
+            else {
+                returnval = parseFloat(val.replace("$", "").replace("%", "").replace(/,/g, '').replace("(", "").replace(")", ""));
+            }
+            return returnval;
+        }
+        $("#tblReport").on('blur', '.correct', function () {
+            // get the current row
+            var currentRow = $(this).closest("tr");
+            ChangeCorrectedValues(currentRow);
+        });
+        $("#tblReport").on('keypress', '.correct', function (event) {
+            var currentRow = $(this).closest("tr");
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == '13') {
+                ChangeCorrectedValues(currentRow);
+            }
+        });
+        function calculateFormula(formula) {
+            const regex = /\[(.*?)\]/;
+            let conditions;
+            var expression = "";
+            while (regex.test(formula)) {
+                if (formula.indexOf("If") != -1) {
+                    conditions = formula.trim().substr(formula.indexOf(formula.split(",")[1]), formula.length);
+                    conditions = conditions.substr(0, conditions.length - 1);
+                    formula = formula.split(",")[0].substr(formula.indexOf("["), formula.length);
+                    var Id = regex.exec(formula)[1];
+                    expression += $("body").find("[data-id='" + Id + "']").val().replace("$", "").replace(/,/g, '');
+                    expression += formula.replace(regex.exec(formula)[0], "").replace(regex.exec(formula.replace(regex.exec(formula)[0], ""))[0], "");
+                    Id = regex.exec(formula.replace(regex.exec(formula)[0], ""))[1];
+                    expression += $("body").find("[data-id='" + Id + "']").val().replace("$", "").replace(/,/g, '');
+                    if (eval(expression)) {
+                        return conditions.split(",")[0];
+                    }
+                    else {
+                        return conditions.split(",")[1];
+                    }
+                }
+                else {
+                    var Id = regex.exec(formula)[1];
+                    if (parseFloat($("body").find("[data-id='" + Id + "']").val().replace("$", "").replace(/,/g, '')) == parseFloat(0.00)) {
+                        return "";
+                    }
+                    expression += $("body").find("[data-id='" + Id + "']").val().replace("$", "").replace(/,/g, '');
+                    formula = formula.replace(regex.exec(formula)[0], "");
+                    if (formula != "") {
+                        expression += formula[0];
+                        formula = formula.replace(formula[0], "");
+                    }
+                }
+            }
+            return parseFloat(eval(expression.replace(/,/g, '')));
+        }
+        function ChangeCorrectedValues(currentRow) {   // JD
+            var calculate = currentRow.find("td:eq(1)").text(); // get current row 1st TD value
+            var formula = currentRow.find("td:eq(0)").find(':hidden').eq(6).val();
+            if (calculate.trim() == "")
+                calculate = "0";
+            var correct = currentRow.find("td:eq(3)").find('input').val(); // get current row 2nd TD
+            var dataorg = currentRow.find("td:eq(3)").find('input').attr('data-org');
+            dataorg = dataorg.replace("$", "").replace("%", "").replace(/,/g, '');
+            var DSRPTF_FieldType = currentRow.find("td:eq(0)").find(':hidden').eq(5).val();
+            if (correct == "") correct = '0';
+            if (calculate == "" && calculate.length == 0) {
+                alert('Per Cash Report value is not in correct format.');
+                currentRow.find("td:eq(3)").find('input').val('');
+            }
+            if (!isNaN(correct.replace(/,/g, ''))) {
+                if (correct != "" || (dataorg == "" && returnNumericVal(correct) != parseFloat(0.00))) {
+                    var calculateSymbol = '';
+                    if (calculate.indexOf("$") != -1 || DSRPTF_FieldType == 'currency') {
+                        calculateSymbol = "$";
+                        var data = returnNumericVal(correct) - returnNumericVal(calculate);
+                        if (formula != "") {
+                            var sum = calculateFormula(formula);
+                            if (sum != "") {
+                                currentRow.find("td:eq(4)").find('input').val(sum.toFixed(2));
+                                currentRow.find("td:eq(4)").find('span').html(addCommas(sum.toFixed(2)));
+                            }
+                        }
+                        currentRow.find("td:eq(5)").find('input').val(data.toFixed(2));
+                        currentRow.find("td:eq(5)").find('span').html(addCommas(data.toFixed(2)));
+                    }
+                    else if (calculate.indexOf("%") != -1 || DSRPTF_FieldType == 'percent') {
+                        calculateSymbol = "%";
+                        var data = returnNumericVal(correct) - returnNumericVal(calculate);
+                        currentRow.find("td:eq(5)").find('input').val(data.toFixed(2));
+                        currentRow.find("td:eq(5)").find('span').html(data.toFixed(2) + '%');
+                    }
+                    else {
+                        var data = returnNumericVal(correct) - returnNumericVal(calculate);
+                        //Test Code //
+                        if (formula != "") {
+                            var sum = calculateFormula(formula);
+                            if (sum != "") {
+                                currentRow.find("td:eq(4)").find('input').val(sum.toFixed(2));
+                                currentRow.find("td:eq(4)").find('span').html(addCommas(sum.toFixed(2)));
+                            }
+                        }
+                        //Test Code //
+                        currentRow.find("td:eq(5)").find('input').val(data.toFixed(0));
+                        currentRow.find("td:eq(5)").find('span').html(data.toFixed(0));
+                    }
+                    if (returnNumericVal(dataorg) != returnNumericVal(correct)) {
+                        if (dataorg == "" && returnNumericVal(correct) == parseFloat(0.00)) {
+                            $(currentRow.find("td:eq(3)").find('input')).css("background-color", "");
+                        }
+                        else {
+                            $(currentRow.find("td:eq(3)").find('input')).css("background-color", "#fbfb93");
+                        }
+                    }
+                    else {
+                        $(currentRow.find("td:eq(3)").find('input')).css("background-color", "");
+                    }
+                    setTimeout(function () {
+                        CalculateTotals(currentRow, calculateSymbol, DSRPTF_FieldType);
+                    }, 100);
+                }
+                else {
+                    if (calculate.indexOf("$") != -1) {
+                        currentRow.find("td:eq(5)").html('$0.00');
+                    }
+                    else if (calculate.indexOf("%") != -1) {
+                        currentRow.find("td:eq(5)").html('0.00%');
+                    }
+                    else {
+                        currentRow.find("td:eq(5)").html(0.00.toFixed(0));
+                    }
+                }
+            }
+            else {
+                alert('Please enter numeric value');
+                currentRow.find("td:eq(3)").find('input').val('');
+                currentRow.find("td:eq(3)").find('input').focus();
+            }
+        }
+        function CalculateTotals(row, calculateSymbol, mainFieldType) {
+            var classes = row.find("td:eq(3)").find('input').attr('class').trim();
+            var totalClass = classes.replace("correct", "");
+            totalClass = totalClass.replace("form-control", "").trim();
+            var DSRPTF_TotalFieldID = row.find("td:eq(0)").find(':hidden').eq(1).val();
+            //Sum of all the Fields whose TotalFieldId is same.
+            var TotalFieldSum = 0;
+            $("#tblReport tbody tr").next().each(function () {
+                var fieldRow = $(this);
+                var TotalFieldID = fieldRow.find("td:eq(0)").find(':hidden').eq(1).val();
+                var Operation = fieldRow.find("td:eq(0)").find(':hidden').eq(2).val();
+                var FieldStyle = fieldRow.find("td:eq(0)").find(':hidden').eq(4).val();
+                var FieldType = fieldRow.find("td:eq(0)").find(':hidden').eq(5).val();
+                if (TotalFieldID != undefined && FieldStyle != undefined) {
+                    if (DSRPTF_TotalFieldID == TotalFieldID) {/* && FieldType == 'currency'*/
+                        if (fieldRow.find("td:eq(3)").find('input').val() != "") {
+                            // Since parseFloat fails with string with comma, adding logic to replace comma with blank
+                            var fieldValStr = fieldRow.find("td:eq(3)").find('input').val();
+                            fieldValStr = fieldValStr.replace(/[^\d\.\-]/g, "").replace("$", "").replace("%", "");
+                            var fieldval = returnNumericVal(fieldValStr);
+                            if (Operation == 'S') {
+                                fieldval = fieldval * (-1);
+                            }
+                            TotalFieldSum += fieldval;
+                        }
+                    }
+                }
+            });
+            //Set Total
+            var total_TotalFieldID;
+            var OriginalTotalFieldSum;
+            $("#tblReport tbody tr").next().each(function () {
+                var totalRow = $(this);
+                var totalRowClass = totalRow.find("td:eq(3)").attr('class');
+                if (totalRowClass != undefined) {
+                    if (totalRowClass == 'td-total') {
+                        var totalRowId = totalRow.find("td:eq(3)").find('input').attr('id');
+                        var RowId = [];
+                        RowId = totalRowId.split('_');
+                        if (DSRPTF_TotalFieldID == RowId[1]) {
+                            //JD
+                            var formula = totalRow.find("td:eq(0)").find(':hidden').eq(6).val();
+                            //var fieldName = totalRow.find("td:eq(0)").text().trim();
+                            OriginalTotalFieldSum = returnNumericVal(totalRow.find("td:eq(3)").find('input').attr('data-org'));
+                            total_TotalFieldID = totalRow.find("td:eq(0)").find(':hidden').eq(1).val();
+                            //Calculate the Adjustment Total
+                            //AdjustmentChange(DSRPTF_TotalFieldID, calculateSymbol);
+                            var OrgCalculatedVal, ChangesCorrectedVal, ChangedAdjustmentVal;
+                            totalRow.find("td:eq(3)").find('input').val(TotalFieldSum.toFixed(2));
+                            if (totalRow.find("td:eq(3)").find('span.number_format').length == 1) {
+                                totalRow.find("td:eq(3)").find('span').html(addCommasWithoutCurrency(TotalFieldSum.toFixed(2)));
+                                //Adjustment
+                                OrgCalculatedVal = returnNumericVal(totalRow.find("td:eq(1)").text());
+                                ChangesCorrectedVal = TotalFieldSum;
+                                ChangedAdjustmentVal = ChangesCorrectedVal - OrgCalculatedVal;
+                                totalRow.find("td:eq(5)").find('input').val(ChangedAdjustmentVal.toFixed(2));
+                                totalRow.find("td:eq(5)").find('span').html(addCommasWithoutCurrency(ChangedAdjustmentVal.toFixed(2)));
+                            }
+                            else {
+                                totalRow.find("td:eq(3)").find('span').html(addCommas(TotalFieldSum.toFixed(2)));
+                                //Adjustment
+                                OrgCalculatedVal = returnNumericVal(totalRow.find("td:eq(1)").text());
+                                ChangesCorrectedVal = TotalFieldSum;
+                                ChangedAdjustmentVal = ChangesCorrectedVal - OrgCalculatedVal;
+                                if (formula != "") {
+                                    var sum = calculateFormula(formula);
+                                    if (sum != "") {
+                                        totalRow.find("td:eq(4)").find('input').val(sum);
+                                        totalRow.find("td:eq(4)").find('span').html(sum);
+                                    }
+                                }
+
+                                totalRow.find("td:eq(5)").find('input').val(ChangedAdjustmentVal.toFixed(2));
+                                totalRow.find("td:eq(5)").find('span').html(addCommas(ChangedAdjustmentVal.toFixed(2)));
+                            }
+                            if (OriginalTotalFieldSum != TotalFieldSum) {
+                                $(totalRow.find("td:eq(3)").find('span')).css("background-color", "#fbfb93");
+                            }
+                            else {
+                                $(totalRow.find("td:eq(3)").find('span')).css("background-color", "");
+                            }
+                        }
+                    }
+                }
+            });
+            //Total + Total
+            if (total_TotalFieldID != "" && total_TotalFieldID != undefined) {
+                $("#tblReport tbody tr").next().each(function () {
+                    var totalRow = $(this);
+                    var totalRowClass = totalRow.find("td:eq(3)").attr('class');
+                    if (totalRowClass != undefined) {
+                        if (totalRowClass == 'td-total') {
+                            var totalRowId = totalRow.find("td:eq(3)").find('input').attr('id');
+                            var RowId = [];
+                            RowId = totalRowId.split('_');
+                            if (total_TotalFieldID == RowId[1]) {
+                                var sTotalFieldSum = 0;
+                                $("#tblReport tbody tr").next().each(function () {
+                                    var fieldRow = $(this);
+                                    var sTotalFieldID = fieldRow.find("td:eq(0)").find(':hidden').eq(1).val();
+                                    var sOperation = fieldRow.find("td:eq(0)").find(':hidden').eq(2).val();
+                                    var sFieldStyle = fieldRow.find("td:eq(0)").find(':hidden').eq(4).val();
+                                    var sFieldType = fieldRow.find("td:eq(0)").find(':hidden').eq(5).val();
+                                    if (sTotalFieldID != undefined && sFieldStyle != undefined) {
+                                        if (total_TotalFieldID == sTotalFieldID) {/* && FieldType == 'currency'*/
+                                            if (fieldRow.find("td:eq(3)").find('input').val().replace("$", "").replace("%", "").replace(/,/g, '') != "") {
+                                                var fieldval = returnNumericVal(fieldRow.find("td:eq(3)").find('input').val());
+                                                if (sOperation == 'S') {
+                                                    fieldval = fieldval * (-1);
+                                                }
+                                                sTotalFieldSum += fieldval;
+                                            }
+                                        }
+                                    }
+                                });
+                                var sOriginalTotalFieldSum = returnNumericVal(totalRow.find("td:eq(3)").find('input').attr('data-org'));
+                                totalRow.find("td:eq(3)").find('input').val(sTotalFieldSum.toFixed(2));
+                                totalRow.find("td:eq(3)").find('span').html(addCommas(sTotalFieldSum.toFixed(2)));
+                                if (sOriginalTotalFieldSum != sTotalFieldSum) {
+                                    $(totalRow.find("td:eq(3)").find('span')).css("background-color", "#fbfb93");
+                                }
+                                else {
+                                    $(totalRow.find("td:eq(3)").find('span')).css("background-color", "");
+                                }
+                                var PerCashVal = 0;
+                                var AdjustmentVal = 0;
+                                if (totalRow.find("td:eq(1)").text().indexOf("$") != -1) {
+                                    PerCashVal = returnNumericVal(totalRow.find("td:eq(1)").text());
+                                    AdjustmentVal = sTotalFieldSum.toFixed(2) - PerCashVal;
+                                    totalRow.find("td:eq(5)").find('input').val(AdjustmentVal.toFixed(2));
+                                    totalRow.find("td:eq(5)").find('span').html(addCommas(AdjustmentVal.toFixed(2)));
+                                }
+                                else if (totalRow.find("td:eq(1)").text().indexOf("%") != -1) {
+                                    PerCashVal = returnNumericVal(totalRow.find("td:eq(1)").text());
+                                    AdjustmentVal = sTotalFieldSum.toFixed(2) - PerCashVal;
+                                    totalRow.find("td:eq(5)").find('input').val(AdjustmentVal.toFixed(2));
+                                    totalRow.find("td:eq(5)").find('span').html(addCommas(AdjustmentVal.toFixed(2)) + "%");
+                                }
+                                else {
+                                    PerCashVal = returnNumericVal(totalRow.find("td:eq(1)").text());
+                                    AdjustmentVal = sTotalFieldSum.toFixed(2) - PerCashVal;
+                                    totalRow.find("td:eq(5)").find('input').val(AdjustmentVal.toFixed(0));
+                                    totalRow.find("td:eq(5)").find('span').html(addCommas(AdjustmentVal.toFixed(0)));
+                                }
+                            }
+                        }
+                        if (totalRowClass == 'td-center') {
+                            var totalRowId = totalRow.find("td:eq(3)").find('input').attr('id');
+                            var RowId = [];
+                            RowId = totalRowId.split('_');
+                            if (total_TotalFieldID == RowId[1]) {
+                                //var val1 = totalRow.find("td:eq(3)").find('input').val().replace(/,/g, '');
+                                //if (val1 != "") {
+                                //    alert("val1: " + val1 + "\nOriginalTotalFieldSum: " + OriginalTotalFieldSum + "\nTotalFieldSum: " + TotalFieldSum);
+                                //    var sTotal = (parseFloat(val1) - OriginalTotalFieldSum) + TotalFieldSum;
+                                //    totalRow.find("td:eq(3)").find('input').val(sTotal.toFixed(2));
+                                //    $(totalRow.find("td:eq(3)").find('input')).css("background-color", "#fbfb93");
+                                //}
+                                var sTotalFieldSumcenter = 0;
+                                $("#tblReport tbody tr").next().each(function () {
+                                    var fieldRowcenter = $(this);
+                                    var sTotalFieldIDcenter = fieldRowcenter.find("td:eq(0)").find(':hidden').eq(1).val();
+                                    var sOperationcenter = fieldRowcenter.find("td:eq(0)").find(':hidden').eq(2).val();
+                                    var sFieldStylecenter = fieldRowcenter.find("td:eq(0)").find(':hidden').eq(4).val();
+                                    var sFieldTypecenter = fieldRowcenter.find("td:eq(0)").find(':hidden').eq(5).val();
+                                    if (sTotalFieldIDcenter != undefined && sFieldStylecenter != undefined) {
+                                        if (total_TotalFieldID == sTotalFieldIDcenter) {/* && sFieldTypecenter == 'currency'*/
+                                            if (fieldRowcenter.find("td:eq(3)").find('input').val().replace("$", "").replace("%", "").replace(/,/g, '') != "") {
+                                                //alert(fieldRowcenter.find("td:eq(0)").text() + "\n" + fieldRowcenter.find("td:eq(3)").find('input').val());
+                                                var fieldvalcenter = returnNumericVal(fieldRowcenter.find("td:eq(3)").find('input').val());
+                                                var fieldvalcenter = returnNumericVal(fieldRowcenter.find("td:eq(3)").find('input').val());
+                                                if (sOperationcenter == 'S') {
+                                                    fieldvalcenter = fieldvalcenter * (-1);
+                                                }
+                                                sTotalFieldSumcenter += fieldvalcenter;
+                                            }
+                                        }
+                                    }
+                                });
+                                var sOriginalTotalFieldSumcenter = returnNumericVal(totalRow.find("td:eq(3)").find('input').attr('data-org'));
+                                totalRow.find("td:eq(3)").find('input').val(sTotalFieldSumcenter.toFixed(2));
+                                if (sOriginalTotalFieldSumcenter != sTotalFieldSumcenter) {
+                                    $(totalRow.find("td:eq(3)").find('input')).css("background-color", "#fbfb93")
+                                }
+                                else {
+                                    $(totalRow.find("td:eq(3)").find('input')).css("background-color", "")
+                                }
+                                BlurChange(totalRow);
+                            }
+                        }
+                    }
+                });
+            }
+            ////Calculate the Adjustment Total
+            //AdjustmentChange(totalClass, calculateSymbol);
+        }
+        function AdjustmentChange(totalClass, calculateSymbol) {
+            var totalAdjustmentSum = 0;
+            $("input[class='" + totalClass + " Adjustment']").each(function () {
+                if ($(this).val() != "") { totalAdjustmentSum += parseFloat($(this).val()); }
+            });
+            //var AdjustmentTr = $("span[class='" + totalClass + "']").closest("tr");
+            if (calculateSymbol == "$") {
+                var AdjustmentTr = $("span[class='" + totalClass + "']").closest("tr");
+                AdjustmentTr.find("td:eq(5)").find('input').val(totalAdjustmentSum.toFixed(2));
+                AdjustmentTr.find("td:eq(5)").find('span').html(addCommas(totalAdjustmentSum.toFixed(2)));
+            }
+            else if (calculateSymbol == "%") {
+                var AdjustmentTr = $("span[class='" + totalClass + "']").closest("tr");
+                AdjustmentTr.find("td:eq(5)").find('input').val(totalAdjustmentSum.toFixed(2));
+                AdjustmentTr.find("td:eq(5)").find('span').html(totalAdjustmentSum.toFixed(2) + "%");
+            }
+            else {
+                var AdjustmentTr = $("span[class='" + totalClass + " number_format']").closest("tr");
+                AdjustmentTr.find("td:eq(5)").find('input').val(totalAdjustmentSum.toFixed(0));
+                AdjustmentTr.find("td:eq(5)").find('span').html(totalAdjustmentSum.toFixed(0));
+            }
+        }
+        function BlurChange(currentRow) {
+            var calculate = currentRow.find("td:eq(1)").text().trim(); // get current row 1st TD value
+            var correct = currentRow.find("td:eq(3)").find('input').val(); // get current row 2nd TD
+            var dataorg = currentRow.find("td:eq(3)").find('input').attr('data-org');
+            dataorg = dataorg.replace("$", "").replace("%", "").replace(/,/g, '');
+            if (calculate == "" && calculate.length == 0) {
+                alert('Per Cash Report value is not in correct format.');
+                currentRow.find("td:eq(3)").find('input').val('');
+            }
+            if (!isNaN(correct)) {
+                if (correct != "") {
+                    var calculateSymbol = "";
+                    if (calculate.indexOf("$") != -1) {
+                        calculateSymbol = "$";
+                        var data = returnNumericVal(correct) - returnNumericVal(calculate);
+                        currentRow.find("td:eq(5)").find('input').val(data.toFixed(2));
+                        currentRow.find("td:eq(5)").find('span').html(addCommas(data.toFixed(2)));
+                    }
+                    else if (calculate.indexOf("%") != -1) {
+                        calculateSymbol = "%";
+                        var data = returnNumericVal(correct) - returnNumericVal(calculate);
+                        currentRow.find("td:eq(5)").find('input').val(data.toFixed(2));
+                        currentRow.find("td:eq(5)").find('span').html(data.toFixed(2) + '%');
+                    }
+                    else {
+                        var data = returnNumericVal(correct) - returnNumericVal(calculate);
+                        currentRow.find("td:eq(5)").find('input').val(data.toFixed(0));
+                        currentRow.find("td:eq(5)").find('span').html(data.toFixed(0));
+                    }
+                    //if (dataorg != "" && !isNaN(dataorg.replace("$","").replace(/,/g, '')) && (returnNumericVal(dataorg) != returnNumericVal(correct))) {
+                    if (dataorg != "" && !isNaN(returnNumericVal(dataorg)) && (returnNumericVal(dataorg)) != returnNumericVal(correct)) {
+                        $(currentRow.find("td:eq(3)").find('input')).css("background-color", "#fbfb93");
+                    }
+                    else {
+                        $(currentRow.find("td:eq(3)").find('input')).css("background-color", "");
+                    }
+                }
+                else {
+                    if (calculate.includes("$")) {
+                        currentRow.find("td:eq(5)").html('$0.00');
+                    }
+                    else if (calculate.includes("%")) {
+                        currentRow.find("td:eq(5)").html('0.00%');
+                    }
+                    else {
+                        currentRow.find("td:eq(5)").html(0.00.toFixed(0));
+                    }
+                }
+            }
+            else {
+                alert('Please enter numeric value');
+                currentRow.find("td:eq(3)").find('input').val('');
+                currentRow.find("td:eq(3)").find('input').focus();
+            }
+        }
+    </script>
+}

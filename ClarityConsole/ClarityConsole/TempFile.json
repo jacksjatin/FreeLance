@@ -1,0 +1,56 @@
+﻿[
+  {
+    "Id": "clarity_new_company_setup",
+    "Tasks": [
+      {
+        "Id": "create_windows_service",
+        "Powershell": "CopyWebDirectory.ps1",
+        "Params": [
+          {
+            "key": "service_name",
+            "PSParamName": "ServiceName",
+            "Value": "paresh.bijvani",
+            "Type": "Static"
+          },
+
+          {
+            "key": "db_name",
+            "PSParamName": "DBName",
+            "Value": "Service_A",
+            "Type": "dynamic"
+          },
+          {
+            "key": "xyz",
+            "PSParamName": "XYZ",
+            "Value": "Service_A",
+            "Type": "dynamic"
+          },
+          {
+            "key": "abc",
+            "PSParamName": "abc",
+            "Value": "Service_A",
+            "Type": "dynamic"
+          }
+        ]
+      }
+
+      //,
+      //{
+      //  "Id": "create_windows_service",
+      //  "Powershell": "CreateTestFolder.ps1",
+      //  "Params": [
+      //    {
+      //      "key": "service_name",
+      //      "PSParamName": "ServiceName1",
+      //      "Value": "Service_A",
+      //      "Type": "Static"
+      //    }
+      //  ]
+      //}
+    ]
+  }
+  //,
+  //{
+  //  "id": "clarity_deploy_new_version"
+  //}
+]
